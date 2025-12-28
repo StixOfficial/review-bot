@@ -35,7 +35,9 @@ client.on("interactionCreate", async interaction => {
                     ])
             );
 
-            await interaction.reply({ content: "Select your rating:", components: [stars], ephemeral: true });
+           await interaction.deferReply({ ephemeral: true });
+           await interaction.editReply({ content: "Select your rating:", components: [stars] });
+
         }
     }
 
@@ -77,8 +79,14 @@ client.on("interactionCreate", async interaction => {
         const channel = await client.channels.fetch(REVIEW_CHANNEL);
         channel.send({ embeds: [embed] });
 
+        if (interaction.replied || interaction.deferred) {
+        await interaction.followUp({ content: "Thank you for leaving a review! ❤️", ephemeral: true });
+        } else {
         await interaction.reply({ content: "Thank you for leaving a review! ❤️", ephemeral: true });
+}
+
     }
 });
 
 client.login(process.env.TOKEN);
+
