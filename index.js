@@ -27,7 +27,7 @@ client.once("clientReady", async () => {
         .setName("review")
         .setDescription("Leave a review");
 
-    await client.application.commands.create(command);
+    await client.application.commands.set([command]);
 });
 
 client.on("interactionCreate", async interaction => {
@@ -38,18 +38,17 @@ client.on("interactionCreate", async interaction => {
         await interaction.deferReply({ flags: 64 });
 
         const stars = new ActionRowBuilder().addComponents(
-            new StringSelectMenuBuilder()
-                .setCustomId("stars")
-                .setPlaceholder("Select your star rating")
-                .addOptions(
-                    { label: "⭐ 1", value: "1" },
-                    { label: "⭐⭐ 2", value: "2" },
-                    { label: "⭐⭐⭐ 3", value: "3" },
-                    { label: "⭐⭐⭐⭐ 4", value: "4" },
-                    { label: "⭐⭐⭐⭐⭐ 5", value: "5" }
-                )
-        );
-
+    new StringSelectMenuBuilder()
+        .setCustomId("stars")
+        .setPlaceholder("Select your star rating")
+        .addOptions(
+            { label: "⭐ 1", value: "1" },
+            { label: "⭐⭐ 2", value: "2" },
+            { label: "⭐⭐⭐ 3", value: "3" },
+            { label: "⭐⭐⭐⭐ 4", value: "4" },
+            { label: "⭐⭐⭐⭐⭐ 5", value: "5" }
+        )
+);
         await interaction.editReply({
             content: "Select your star rating:",
             components: [stars]
@@ -65,7 +64,7 @@ client.on("interactionCreate", async interaction => {
             const rating = interaction.values[0];
 
             const modal = new ModalBuilder()
-                .setCustomId(`review-${rating}`)
+               .setCustomId(`review_${rating}`)
                 .setTitle("Leave a Review");
 
             const reviewInput = new TextInputBuilder()
@@ -80,37 +79,39 @@ client.on("interactionCreate", async interaction => {
         }
     }
 
-    if (interaction.type === InteractionType.ModalSubmit) {
-        const rating = interaction.customId.split("-")[1];
-        const review = interaction.fields.getTextInputValue("text");
-
-const messages = await channel.messages.fetch({ limit: 100 });
-const reviewCount = messages.filter(m => m.embeds.length).size + 1;
-
-const embed = new EmbedBuilder()
-    .setColor(0x00FF9C) // green accent
-    .setTitle(`Review from @${interaction.user.username} | Total reviews: ${reviewCount}`)
-    .setThumbnail(interaction.user.displayAvatarURL({ size: 256 }))
-    .addFields(
-        { name: "Rating", value: "⭐".repeat(Number(rating)), inline: false },
-        { name: "Comment", value: text, inline: false }
-    )
-    .setFooter({ text: interaction.user.username })
-    .setTimestamp();
-
+if (interaction.type === InteractionType.ModalSubmit) {
+    try {
+        const rating = interaction.customId.split("_")[1];
+        const text = interaction.fields.getTextInputValue("text");
 
         const channel = await client.channels.fetch(REVIEW_CHANNEL);
-        try {
-    await channel.send({ embeds: [embed] });
-} catch (e) {
-    console.error(e);
-}
 
+        // count reviews
+        const messages = await channel.messages.fetch({ limit: 100 });
+        const reviewCount = messages.filter(m => m.embeds.length).size + 1;
 
-if (interaction.replied || interaction.deferred) {
-    await interaction.followUp({ content: "Thank you for leaving a review! ❤️", flags: 64 });
-} else {
-    await interaction.reply({ content: "Thank you for leaving a review! ❤️", flags: 64 });
+        const embed = new EmbedBuilder()
+            .setColor(0x00FF9C)
+            .setTitle(`Review from @${interaction.user.username} | Total reviews: ${reviewCount}`)
+            .setThumbnail(interaction.user.displayAvatarURL({ size: 256 }))
+            .addFields(
+                { name: "Rating", value: "⭐".repeat(Number(rating)), inline: false },
+                { name: "Comment", value: text, inline: false }
+            )
+            .setFooter({ text: interaction.user.username })
+            .setTimestamp();
+
+        await channel.send({ embeds: [embed] });
+
+        if (interaction.replied || interaction.deferred) {
+            await interaction.followUp({ content: "Thank you for leaving a review! ❤️", flags: 64 });
+        } else {
+            await interaction.reply({ content: "Thank you for leaving a review! ❤️", flags: 64 });
+        }
+
+    } catch (e) {
+        if (e?.code !== 10062) console.error(e);
+    }
 }
 
 
@@ -118,6 +119,7 @@ if (interaction.replied || interaction.deferred) {
 });
 
 client.login(process.env.TOKEN);
+
 
 
 
