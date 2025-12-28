@@ -5,7 +5,13 @@ const client = new Client({
     intents: [GatewayIntentBits.Guilds]
 });
 
-const REVIEW_CHANNEL = "PUT_CHANNEL_ID_HERE";
+process.on("unhandledRejection", (error) => {
+    if (error.code === 10062) return; // ignore Unknown Interaction
+    console.error("Unhandled promise rejection:", error);
+});
+
+
+const REVIEW_CHANNEL = "1447572361405661345";
 
 client.once("ready", async () => {
     console.log("Review bot online!");
@@ -36,7 +42,11 @@ client.on("interactionCreate", async interaction => {
             );
 
            await interaction.deferReply({ ephemeral: true });
-           await interaction.editReply({ content: "Select your rating:", components: [stars] });
+           try {
+    await interaction.editReply({ content: "Select your rating:", components: [stars] });
+} catch (e) {
+    if (e.code !== 10062) console.error(e);
+}
 
         }
     }
@@ -77,7 +87,12 @@ client.on("interactionCreate", async interaction => {
             .setTimestamp();
 
         const channel = await client.channels.fetch(REVIEW_CHANNEL);
-        channel.send({ embeds: [embed] });
+        try {
+    await channel.send({ embeds: [embed] });
+} catch (e) {
+    console.error(e);
+}
+
 
         if (interaction.replied || interaction.deferred) {
         await interaction.followUp({ content: "Thank you for leaving a review! ❤️", ephemeral: true });
@@ -89,4 +104,5 @@ client.on("interactionCreate", async interaction => {
 });
 
 client.login(process.env.TOKEN);
+
 
