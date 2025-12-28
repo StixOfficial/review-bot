@@ -95,7 +95,7 @@ client.on("interactionCreate", async (interaction) => {
       const reviewCount = messages.filter(m => m.embeds.length).size + 1;
 
       const embed = new EmbedBuilder()
-        .setColor(0x00FF9C)
+        .setColor(0xB7FF00)
         .setTitle(`Review from @${interaction.user.username} | Total reviews: ${reviewCount}`)
         .setThumbnail(interaction.user.displayAvatarURL({ size: 256 }))
         .addFields(
@@ -118,3 +118,4 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 client.login(process.env.TOKEN);
+
