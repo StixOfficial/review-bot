@@ -16,6 +16,12 @@ const REVIEW_CHANNEL = "1447572361405661345";
 client.once("ready", async () => {
     console.log("Review bot online!");
 
+    client.user.setPresence({
+        activities: [{ name: "Fuze Studios", type: 3 }], // 3 = Watching
+        status: "online"
+    });
+
+
     const command = new SlashCommandBuilder()
         .setName("review")
         .setDescription("Leave a review");
@@ -75,16 +81,20 @@ client.on("interactionCreate", async interaction => {
         const rating = interaction.customId.split("-")[1];
         const review = interaction.fields.getTextInputValue("text");
 
-        const embed = new EmbedBuilder()
-            .setColor("Gold")
-            .setAuthor({
-                name: interaction.user.username,
-                iconURL: interaction.user.displayAvatarURL()
-            })
-            .setDescription(review)
-            .addFields({ name: "Rating", value: "⭐".repeat(rating) })
-            .setFooter({ text: "Thank you for your review!" })
-            .setTimestamp();
+const messages = await channel.messages.fetch({ limit: 100 });
+const reviewCount = messages.filter(m => m.embeds.length).size + 1;
+
+const embed = new EmbedBuilder()
+    .setColor(0x00FF9C) // green accent
+    .setTitle(`Review from @${interaction.user.username} | Total reviews: ${reviewCount}`)
+    .setThumbnail(interaction.user.displayAvatarURL({ size: 256 }))
+    .addFields(
+        { name: "Rating", value: "⭐".repeat(Number(rating)), inline: false },
+        { name: "Comment", value: text, inline: false }
+    )
+    .setFooter({ text: interaction.user.username })
+    .setTimestamp();
+
 
         const channel = await client.channels.fetch(REVIEW_CHANNEL);
         try {
@@ -104,5 +114,6 @@ client.on("interactionCreate", async interaction => {
 });
 
 client.login(process.env.TOKEN);
+
 
 
