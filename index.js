@@ -32,31 +32,33 @@ client.once("clientReady", async () => {
 
 client.on("interactionCreate", async interaction => {
 
-    if (interaction.isChatInputCommand()) {
-        if (interaction.commandName === "review") {
+    if (interaction.isChatInputCommand() && interaction.commandName === "review") {
+    try {
+        // instantly acknowledge Discord
+        await interaction.deferReply({ flags: 64 });
 
-            const stars = new ActionRowBuilder().addComponents(
-                new StringSelectMenuBuilder()
-                    .setCustomId("stars")
-                    .setPlaceholder("Select your star rating")
-                    .addOptions([
-                        { label: "⭐ 1", value: "1" },
-                        { label: "⭐⭐ 2", value: "2" },
-                        { label: "⭐⭐⭐ 3", value: "3" },
-                        { label: "⭐⭐⭐⭐ 4", value: "4" },
-                        { label: "⭐⭐⭐⭐⭐ 5", value: "5" }
-                    ])
-            );
+        const stars = new ActionRowBuilder().addComponents(
+            new StringSelectMenuBuilder()
+                .setCustomId("stars")
+                .setPlaceholder("Select your star rating")
+                .addOptions(
+                    { label: "⭐ 1", value: "1" },
+                    { label: "⭐⭐ 2", value: "2" },
+                    { label: "⭐⭐⭐ 3", value: "3" },
+                    { label: "⭐⭐⭐⭐ 4", value: "4" },
+                    { label: "⭐⭐⭐⭐⭐ 5", value: "5" }
+                )
+        );
 
-           await interaction.deferReply({ flags: 64 });
-           try {
-    await interaction.editReply({ content: "Select your rating:", components: [stars] });
-} catch (e) {
-    if (e.code !== 10062) console.error(e);
-}
+        await interaction.editReply({
+            content: "Select your star rating:",
+            components: [stars]
+        });
 
-        }
+    } catch (e) {
+        if (e?.code !== 10062) console.error(e);
     }
+}
 
     if (interaction.isStringSelectMenu()) {
         if (interaction.customId === "stars") {
@@ -116,6 +118,7 @@ if (interaction.replied || interaction.deferred) {
 });
 
 client.login(process.env.TOKEN);
+
 
 
 
