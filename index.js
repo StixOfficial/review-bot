@@ -13,7 +13,8 @@ process.on("unhandledRejection", (error) => {
 
 const REVIEW_CHANNEL = "1447572361405661345";
 
-client.once("ready", async () => {
+client.once("clientReady", async () => {
+
     console.log("Review bot online!");
 
     client.user.setPresence({
@@ -47,7 +48,7 @@ client.on("interactionCreate", async interaction => {
                     ])
             );
 
-           await interaction.deferReply({ ephemeral: true });
+           await interaction.deferReply({ flags: 64 });
            try {
     await interaction.editReply({ content: "Select your rating:", components: [stars] });
 } catch (e) {
@@ -104,16 +105,18 @@ const embed = new EmbedBuilder()
 }
 
 
-        if (interaction.replied || interaction.deferred) {
-        await interaction.followUp({ content: "Thank you for leaving a review! ❤️", ephemeral: true });
-        } else {
-        await interaction.reply({ content: "Thank you for leaving a review! ❤️", ephemeral: true });
+if (interaction.replied || interaction.deferred) {
+    await interaction.followUp({ content: "Thank you for leaving a review! ❤️", flags: 64 });
+} else {
+    await interaction.reply({ content: "Thank you for leaving a review! ❤️", flags: 64 });
 }
+
 
     }
 });
 
 client.login(process.env.TOKEN);
+
 
 
 
