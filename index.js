@@ -16,13 +16,21 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds]
 });
 
+// CHANGE THESE IF NEEDED
 const REVIEW_CHANNEL = "1447572361405661345";
+const GUILD_ID = "1301383051724460142";
+
+// Prevent crashes from expired interactions
+process.on("unhandledRejection", (err) => {
+  if (err?.code === 10062) return;
+  console.error(err);
+});
 
 client.once("clientReady", async () => {
   console.log("Review bot online!");
 
   client.user.setPresence({
-    activities: [{ name: "Fuze Studios Reviews", type: 3 }],
+    activities: [{ name: "Fuze Studios", type: 3 }],
     status: "online"
   });
 
@@ -30,19 +38,17 @@ client.once("clientReady", async () => {
     .setName("review")
     .setDescription("Leave a review");
 
-  await client.application.commands.set([command]);
+  // Register command ONLY in your server so it appears instantly
+  const guild = await client.guilds.fetch(GUILD_ID);
+  await guild.commands.set([command]);
 });
 
 client.on("interactionCreate", async (interaction) => {
   try {
 
-    // SLASH COMMAND
+    // /review
     if (interaction.isChatInputCommand() && interaction.commandName === "review") {
-      // instantly acknowledge Discord
-      await interaction.reply({
-        content: "Loading review menu...",
-        flags: 64
-      });
+      await interaction.reply({ content: "Loading review menu...", flags: 64 });
 
       const stars = new ActionRowBuilder().addComponents(
         new StringSelectMenuBuilder()
@@ -63,7 +69,7 @@ client.on("interactionCreate", async (interaction) => {
       });
     }
 
-    // STAR SELECTED
+    // Star selected
     if (interaction.isStringSelectMenu() && interaction.customId === "stars") {
       const rating = interaction.values[0];
 
@@ -82,12 +88,12 @@ client.on("interactionCreate", async (interaction) => {
       return interaction.showModal(modal);
     }
 
-    // MODAL SUBMIT
+    // Review submitted
     if (interaction.type === InteractionType.ModalSubmit) {
       const rating = interaction.customId.split("_")[1];
       const text = interaction.fields.getTextInputValue("text");
 
-      // acknowledge instantly so Discord doesn't timeout
+      // Ack instantly
       await interaction.reply({ content: "Submitting your review...", flags: 64 });
 
       const channel = await client.channels.fetch(REVIEW_CHANNEL);
@@ -95,8 +101,8 @@ client.on("interactionCreate", async (interaction) => {
       const reviewCount = messages.filter(m => m.embeds.length).size + 1;
 
       const embed = new EmbedBuilder()
-        .setColor(0xB7FF00)
-        .setTitle(`Review from @${interaction.user.username} | Total reviews: ${reviewCount}`)
+        .setColor(0xB7FF00) // #b7ff00
+        .setTitle(`Review from ${interaction.user} | Total reviews: ${reviewCount}`)
         .setThumbnail(interaction.user.displayAvatarURL({ size: 256 }))
         .addFields(
           { name: "Rating", value: "⭐".repeat(Number(rating)), inline: false },
@@ -112,11 +118,9 @@ client.on("interactionCreate", async (interaction) => {
       });
     }
 
-  } catch (err) {
-    console.error(err);
+  } catch (e) {
+    if (e?.code !== 10062) console.error(e);
   }
 });
 
 client.login(process.env.TOKEN);
-
-
