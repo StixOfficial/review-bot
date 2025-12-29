@@ -35,7 +35,7 @@ client.once("clientReady", async () => {
   });
 
   const command = new SlashCommandBuilder()
-    .setName("review")
+    .setName("fuzereview")
     .setDescription("Leave a review");
 
   // 🔥 Wipe ALL global commands (removes admin-only bug)
@@ -127,4 +127,5 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 client.login(process.env.TOKEN);
+
 
