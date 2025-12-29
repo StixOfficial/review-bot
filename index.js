@@ -22,7 +22,7 @@ client.once("clientReady", async () => {
   console.log("Review bot online!");
 
   client.user.setPresence({
-    activities: [{ name: "Fuze Studios", type: 3 }],
+    activities: [{ name: "Fuze Studios Reviews", type: 3 }],
     status: "online"
   });
 
@@ -118,4 +118,5 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 client.login(process.env.TOKEN);
+
 
