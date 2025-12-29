@@ -20,7 +20,7 @@ const client = new Client({
 const REVIEW_CHANNEL = "1447572361405661345";
 const GUILD_ID = "1301383051724460142";
 
-// Prevent crashes from Discord timing issues
+// Prevent crashes
 process.on("unhandledRejection", (err) => {
   if (err?.code === 10062) return;
   console.error(err);
@@ -38,12 +38,14 @@ client.once("clientReady", async () => {
     .setName("review")
     .setDescription("Leave a review");
 
-  // Wipe broken global commands
+  // 🔥 Wipe ALL global commands (removes admin-only bug)
   await client.application.commands.set([]);
 
-  // Register server-only command (instant)
+  // 🔥 Register ONLY for your server (instant + @everyone works)
   const guild = await client.guilds.fetch(GUILD_ID);
   await guild.commands.set([command]);
+
+  console.log("Slash commands rebuilt.");
 });
 
 client.on("interactionCreate", async (interaction) => {
@@ -72,7 +74,7 @@ client.on("interactionCreate", async (interaction) => {
       });
     }
 
-    // Star chosen
+    // Star selected
     if (interaction.isStringSelectMenu() && interaction.customId === "stars") {
       const rating = interaction.values[0];
 
@@ -87,7 +89,6 @@ client.on("interactionCreate", async (interaction) => {
         .setRequired(true);
 
       modal.addComponents(new ActionRowBuilder().addComponents(input));
-
       return interaction.showModal(modal);
     }
 
@@ -103,7 +104,7 @@ client.on("interactionCreate", async (interaction) => {
       const reviewCount = messages.filter(m => m.embeds.length).size + 1;
 
       const embed = new EmbedBuilder()
-        .setColor(0xB7FF00) // #b7ff00
+        .setColor(0xB7FF00)
         .setTitle(`Review from ${interaction.user} | Total reviews: ${reviewCount}`)
         .setThumbnail(interaction.user.displayAvatarURL({ size: 256 }))
         .addFields(
