@@ -16,11 +16,11 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds]
 });
 
-// CHANGE THESE IF NEEDED
+// CHANGE THESE
 const REVIEW_CHANNEL = "1447572361405661345";
 const GUILD_ID = "1301383051724460142";
 
-// Prevent crashes from expired interactions
+// Prevent crashes from Discord timing issues
 process.on("unhandledRejection", (err) => {
   if (err?.code === 10062) return;
   console.error(err);
@@ -38,7 +38,10 @@ client.once("clientReady", async () => {
     .setName("review")
     .setDescription("Leave a review");
 
-  // Register command ONLY in your server so it appears instantly
+  // Wipe broken global commands
+  await client.application.commands.set([]);
+
+  // Register server-only command (instant)
   const guild = await client.guilds.fetch(GUILD_ID);
   await guild.commands.set([command]);
 });
@@ -69,7 +72,7 @@ client.on("interactionCreate", async (interaction) => {
       });
     }
 
-    // Star selected
+    // Star chosen
     if (interaction.isStringSelectMenu() && interaction.customId === "stars") {
       const rating = interaction.values[0];
 
@@ -93,7 +96,6 @@ client.on("interactionCreate", async (interaction) => {
       const rating = interaction.customId.split("_")[1];
       const text = interaction.fields.getTextInputValue("text");
 
-      // Ack instantly
       await interaction.reply({ content: "Submitting your review...", flags: 64 });
 
       const channel = await client.channels.fetch(REVIEW_CHANNEL);
