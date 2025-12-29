@@ -16,11 +16,10 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds]
 });
 
-// CHANGE THESE
+// CHANGE THESE IF NEEDED
 const REVIEW_CHANNEL = "1447572361405661345";
 const GUILD_ID = "1301383051724460142";
 
-// Prevent crashes
 process.on("unhandledRejection", (err) => {
   if (err?.code === 10062) return;
   console.error(err);
@@ -30,22 +29,20 @@ client.once("clientReady", async () => {
   console.log("Review bot online!");
 
   client.user.setPresence({
-    activities: [{ name: "Fuze Studios Reviews", type: 3 }],
+    activities: [{ name: "Fuze Studios", type: 3 }],
     status: "online"
   });
 
   const command = new SlashCommandBuilder()
-    .setName("fuzereview")
+    .setName("review")
     .setDescription("Leave a review");
 
-  // 🔥 Wipe ALL global commands (removes admin-only bug)
+  // Remove broken global commands
   await client.application.commands.set([]);
 
-  // 🔥 Register ONLY for your server (instant + @everyone works)
+  // Register guild command (instant, works for @everyone)
   const guild = await client.guilds.fetch(GUILD_ID);
   await guild.commands.set([command]);
-
-  console.log("Slash commands rebuilt.");
 });
 
 client.on("interactionCreate", async (interaction) => {
@@ -53,7 +50,7 @@ client.on("interactionCreate", async (interaction) => {
 
     // /review
     if (interaction.isChatInputCommand() && interaction.commandName === "review") {
-      await interaction.reply({ content: "Loading review menu...", flags: 64 });
+      await interaction.deferReply({ flags: 64 });
 
       const stars = new ActionRowBuilder().addComponents(
         new StringSelectMenuBuilder()
@@ -127,5 +124,3 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 client.login(process.env.TOKEN);
-
-
