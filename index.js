@@ -102,7 +102,7 @@ client.on("interactionCreate", async (interaction) => {
 
       const embed = new EmbedBuilder()
         .setColor(0xB7FF00)
-        .setTitle(`Review from ${interaction.user} | Total reviews: ${reviewCount}`)
+        .setTitle(`Review from <@${interaction.user.id}> | Total reviews: ${reviewCount}`)
         .setThumbnail(interaction.user.displayAvatarURL({ size: 256 }))
         .addFields(
           { name: "Rating", value: "⭐".repeat(Number(rating)), inline: false },
@@ -124,3 +124,4 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 client.login(process.env.TOKEN);
+
